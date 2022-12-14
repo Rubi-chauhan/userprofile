@@ -32,17 +32,18 @@ try{
           });
         }
 
-    if (data.password) {
+        if (!isValidPass(password)) {
+            return res.status(400).send({
+              status: false,
+              message: `Weak password - password length b/w 8 - 15 characters`,
+            });
+          }
 
-        let securePassword = data.password;
-        
-        const encryptedPassword = async function (securePassword) {
-            const passwordHash = await bcrypt.hash(securePassword, 10);
-            data.password = passwordHash;
-          };
-          encryptedPassword(securePassword);
+          let actualPass = data.password;
+          //encrypt password
+          data.password = await bcrypt.hash(data.password, 10);
 
-    }
+    
 
 
     const user = await userModel.create(data);
@@ -77,7 +78,7 @@ const loginUser = async (req, res) => {
       }
       //  password Validation
   
-      const emailCheck = await userModel(email)
+      const emailCheck = await userModel.findOne({email:email})
       if (!emailCheck) {
         return res.status(404).send({ status: false, message: `${email} not found` })
       }
